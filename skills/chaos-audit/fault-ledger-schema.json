@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical contract for fault-ledger.json. Enforced directly by validate-fault-ledger.cjs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "target_commit", "units"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "target_commit": { "type": "string", "minLength": 1 },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fault_unit_id",
+          "canonical_refs",
+          "invariant",
+          "starting_paths",
+          "selected_playbooks",
+          "excluded_playbooks",
+          "prior_status",
+          "attempts",
+          "wave",
+          "status",
+          "agent_id",
+          "reviewed_paths",
+          "reproducer_checks",
+          "result_fingerprints",
+          "unresolved"
+        ],
+        "properties": {
+          "fault_unit_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$"
+          },
+          "canonical_refs": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["surface", "state_store", "subsystem", "failure_class"],
+            "properties": {
+              "surface": { "type": "string", "minLength": 1 },
+              "state_store": { "type": "string", "minLength": 1 },
+              "subsystem": { "type": "string", "minLength": 1 },
+              "failure_class": { "type": "string", "minLength": 1 }
+            }
+          },
+          "invariant": { "type": "string", "minLength": 1 },
+          "starting_paths": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selected_playbooks": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "excluded_playbooks": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "prior_status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "new",
+              "prior_confirmed_same_source",
+              "prior_confirmed_changed_source",
+              "prior_needs_validation",
+              "prior_deferred",
+              "prior_blocked",
+              "prior_out_of_scope",
+              "prior_covered_same_source",
+              "prior_covered_changed_source",
+              "prior_rejected_same_source",
+              "prior_rejected_changed_source"
+            ]
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "wave",
+                "status",
+                "agent_id",
+                "reviewed_paths",
+                "reproducer_checks",
+                "result_fingerprints",
+                "unresolved",
+                "reassignment_reason"
+              ],
+              "properties": {
+                "wave": { "type": "integer", "minimum": 1 },
+                "status": { "type": "string", "enum": ["covered", "candidate", "blocked"] },
+                "agent_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+                "reviewed_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                "reproducer_checks": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                "result_fingerprints": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                "unresolved": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                "reassignment_reason": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "wave": { "type": ["integer", "null"], "minimum": 0 },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "not_applicable",
+              "out_of_scope",
+              "in_progress",
+              "covered",
+              "candidate",
+              "blocked",
+              "deferred"
+            ]
+          },
+          "agent_id": {
+            "type": ["string", "null"],
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+          },
+          "reviewed_paths": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reproducer_checks": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "result_fingerprints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+            }
+          },
+          "unresolved": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

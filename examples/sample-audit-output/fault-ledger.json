@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "run_id": "sample-run-001",
+  "target_commit": "vulnerable-checkout-v1",
+  "units": [
+    {
+      "fault_unit_id": "fu-checkout-wallet-001",
+      "canonical_refs": {
+        "surface": "POST /checkout",
+        "state_store": "FileCheckoutStore.wallets",
+        "subsystem": "checkout",
+        "failure_class": "toctou_race"
+      },
+      "invariant": "Wallet balance must never become negative and total debited orders must never exceed initial balance under concurrent requests.",
+      "starting_paths": ["server.js", "store.js"],
+      "selected_playbooks": ["FAILURE-CLASSES.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md", "AI-AGENTS-AND-LLM-PIPELINES.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-checkout-1",
+      "reviewed_paths": ["server.js", "store.js"],
+      "reproducer_checks": [
+        "Proposed parallel Promise.all POST /checkout test against $100 wallet with two $80 debits."
+      ],
+      "result_fingerprints": ["fp-checkout-toctou-001"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-webhook-payment-002",
+      "canonical_refs": {
+        "surface": "POST /webhooks/payment",
+        "state_store": "FileCheckoutStore.webhooks",
+        "subsystem": "billing-webhooks",
+        "failure_class": "non_idempotent_retry"
+      },
+      "invariant": "Duplicate delivery of the same payment eventId must credit the target wallet at most once.",
+      "starting_paths": ["server.js", "store.js"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "QUEUES-WEBHOOKS-AND-WORKERS.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-webhooks-2",
+      "reviewed_paths": ["server.js", "store.js"],
+      "reproducer_checks": [
+        "Proposed concurrent and sequential replay of identical eventId evt_stripe_991."
+      ],
+      "result_fingerprints": ["fp-webhook-duplicate-002"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-recommendations-outbound-003",
+      "canonical_refs": {
+        "surface": "GET /recommendations",
+        "state_store": "http-sockets",
+        "subsystem": "recommendations",
+        "failure_class": "missing_timeout"
+      },
+      "invariant": "Outbound upstream HTTP calls must enforce an explicit timeout and return within bounded latency.",
+      "starting_paths": ["server.js"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "HTTP-CACHING-AND-DISTRIBUTED.md"],
+      "excluded_playbooks": ["DATABASE-AND-TRANSACTIONS.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-http-3",
+      "reviewed_paths": ["server.js"],
+      "reproducer_checks": [
+        "Proposed local blackhole upstream TCP server accepting connections without responding."
+      ],
+      "result_fingerprints": ["fp-recommendations-timeout-003"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-store-crash-004",
+      "canonical_refs": {
+        "surface": "FileCheckoutStore.writeState",
+        "state_store": "disk-json",
+        "subsystem": "persistence",
+        "failure_class": "non_atomic_file_write"
+      },
+      "invariant": "On-disk JSON state must remain valid and parseable if the process crashes mid-write.",
+      "starting_paths": ["store.js"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "FILESYSTEM-IPC-AND-SHUTDOWN.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "blocked",
+      "agent_id": "hunter-fs-4",
+      "reviewed_paths": ["store.js"],
+      "reproducer_checks": [
+        "Inspected writeState in store.js; uses direct fs.writeFileSync without temp+rename."
+      ],
+      "result_fingerprints": ["fp-store-nonatomic-crash-004"],
+      "unresolved": [
+        "Deterministic mid-syscall SIGKILL / power-loss truncation requires OS block/syscall fault injection outside Node userland."
+      ]
+    },
+    {
+      "fault_unit_id": "fu-refund-guard-005",
+      "canonical_refs": {
+        "surface": "POST /refund",
+        "state_store": "FileCheckoutStore.refunds",
+        "subsystem": "refunds",
+        "failure_class": "non_idempotent_retry"
+      },
+      "invariant": "Concurrent POST /refund calls for the same orderId must issue at most one refund.",
+      "starting_paths": ["server.js", "store.js"],
+      "selected_playbooks": ["FAILURE-CLASSES.md"],
+      "excluded_playbooks": ["AI-AGENTS-AND-LLM-PIPELINES.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "covered",
+      "agent_id": "hunter-refund-5",
+      "reviewed_paths": ["server.js", "store.js"],
+      "reproducer_checks": [
+        "Disprover verified synchronous inFlightRefunds Set + hasRefund guard and ran concurrent /refund check (1x 200, 1x 409)."
+      ],
+      "result_fingerprints": [],
+      "unresolved": []
+    }
+  ]
+}

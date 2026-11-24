@@ -1,0 +1,5 @@
+{
+  "name": "chaos-audit-skill",
+  "version": "1.0.0",
+  "description": "Six-phase adversarial reliability, concurrency, and chaos engineering skill for coding agents -- proven by executed failing reproducer tests and zero-dependency schema gates."
+}

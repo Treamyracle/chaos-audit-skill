@@ -1,0 +1,11 @@
+{
+  "name": "chaos-audit",
+  "displayName": "Chaos Audit",
+  "description": "Six-phase adversarial reliability, concurrency, and chaos engineering audit skill -- hunts TOCTOU races, duplicate retries, deadlocks, and LLM pipeline failures with deterministic reproducer proofs.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Run a chaos audit on this codebase",
+    "Hunt race conditions, duplicate webhook retries, and missing timeouts in ./src",
+    "Verify whether our checkout and refund handlers are safe under concurrent requests"
+  ]
+}

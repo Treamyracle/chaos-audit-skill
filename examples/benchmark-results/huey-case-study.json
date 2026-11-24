@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "target_repo": "coleifer/huey",
+  "target_version": "3.5.4",
+  "target_license": "MIT",
+  "target_commit": "7ea73730b9b6d413effdd67880970eb3e674974c",
+  "generated_at": "2026-11-24T07:39:33Z",
+  "environment": {
+    "python_version": "3.13.0",
+    "platform": "win32",
+    "machine": "AMD64"
+  },
+  "methodology_notes": "Zero mocks and zero artificial sleeps; tests run directly against untouched coleifer/huey storage classes using multi-threaded synchronization barriers.",
+  "trials_per_scenario": 50,
+  "total_chaos_trials": 150,
+  "duration_ms": 139421,
+  "scenarios": {
+    "file_storage_peek_data_toctou": {
+      "surface": "FileStorage.peek_data vs. pop_data (huey/storage.py:1576-1600)",
+      "failure_class": "toctou_race",
+      "before": {
+        "trials": 50,
+        "invariant_violations": 50,
+        "violation_rate_pct": 100.0,
+        "total_exceptions": 444,
+        "exception_types": {
+          "PermissionError": 438,
+          "FileNotFoundError": 6
+        },
+        "latency_ms": {
+          "samples": 50,
+          "p50": 637.93,
+          "p95": 680.12,
+          "p99": 713.72,
+          "max": 713.72
+        }
+      },
+      "after": {
+        "trials": 50,
+        "invariant_violations": 0,
+        "violation_rate_pct": 0.0,
+        "total_exceptions": 0,
+        "exception_types": {},
+        "latency_ms": {
+          "samples": 50,
+          "p50": 675.22,
+          "p95": 844.4,
+          "p99": 863.76,
+          "max": 863.76
+        }
+      }
+    },
+    "file_storage_enqueued_items_toctou": {
+      "surface": "FileStorage.enqueued_items vs. dequeue (huey/storage.py:1447-1471)",
+      "failure_class": "toctou_race",
+      "before": {
+        "trials": 50,
+        "invariant_violations": 50,
+        "violation_rate_pct": 100.0,
+        "total_exceptions": 1468,
+        "exception_types": {
+          "PermissionError": 990,
+          "FileNotFoundError": 478
+        },
+        "latency_ms": {
+          "samples": 50,
+          "p50": 295.61,
+          "p95": 368.17,
+          "p99": 394.68,
+          "max": 394.68
+        }
+      },
+      "after": {
+        "trials": 50,
+        "invariant_violations": 0,
+        "violation_rate_pct": 0.0,
+        "total_exceptions": 0,
+        "exception_types": {},
+        "latency_ms": {
+          "samples": 50,
+          "p50": 509.56,
+          "p95": 605.93,
+          "p99": 655.46,
+          "max": 655.46
+        }
+      }
+    },
+    "file_storage_result_items_toctou": {
+      "surface": "FileStorage.result_items vs. put_data/pop_data (huey/storage.py:1631-1647)",
+      "failure_class": "toctou_race",
+      "before": {
+        "trials": 50,
+        "invariant_violations": 45,
+        "violation_rate_pct": 90.0,
+        "total_exceptions": 127,
+        "exception_types": {
+          "PermissionError": 86,
+          "FileNotFoundError": 41
+        },
+        "latency_ms": {
+          "samples": 50,
+          "p50": 248.8,
+          "p95": 295.27,
+          "p99": 398.05,
+          "max": 398.05
+        }
+      },
+      "after": {
+        "trials": 50,
+        "invariant_violations": 0,
+        "violation_rate_pct": 0.0,
+        "total_exceptions": 0,
+        "exception_types": {},
+        "latency_ms": {
+          "samples": 50,
+          "p50": 260.45,
+          "p95": 292.77,
+          "p99": 369.52,
+          "max": 369.52
+        }
+      }
+    }
+  },
+  "disprover_verifications": {
+    "sqlite_dequeue": {
+      "surface": "SqliteStorage.dequeue (BaseSqlStorage.db self.lock + begin exclusive)",
+      "mitigating_guard": "huey/storage.py:821-852, 936-950",
+      "trials": 50,
+      "duplicate_or_loss_trials": 0,
+      "runtime_errors": 0,
+      "verdict": "rejected"
+    },
+    "memory_result_items": {
+      "surface": "MemoryStorage.result_items (dict(self._results))",
+      "mitigating_guard": "huey/storage.py:432-433 (CPython PyDict_Copy executes under GIL without yielding)",
+      "trials": 50,
+      "runtime_errors": 0,
+      "verdict": "rejected"
+    }
+  }
+}

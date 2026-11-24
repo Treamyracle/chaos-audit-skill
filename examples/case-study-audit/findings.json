@@ -1,0 +1,171 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-tinydb-concurrent-write-001",
+    "fault_unit_ids": ["fu-tinydb-concurrent-write-001"],
+    "title": "Unsynchronized Table._update_table and shared JSONStorage._handle cause JSON corruption and lost writes under concurrent threads",
+    "failure_class": "lost_update",
+    "severity": "critical",
+    "blast_radius": "Multi-threaded web workers or background tasks sharing a TinyDB instance overwrite each other's inserts, throw JSONDecodeError/ValueError, and corrupt the JSON file on disk (43/50 corrupted DBs in testing).",
+    "trigger_likelihood": "High in multi-threaded Python apps (e.g., Flask/FastAPI threadpools, ThreadPoolExecutor, background workers) sharing a TinyDB instance.",
+    "broken_invariant": "Concurrent inserts on a TinyDB instance must preserve all committed documents and never corrupt JSONStorage._handle.",
+    "root_cause": "Table.insert invokes unsynchronized _get_next_id() and _update_table(), which reads the entire DB via JSONStorage.read(), mutates a local table dict in memory, and writes back via a single shared file handle self._handle without any lock around seek(0)/json.load/write/truncate.",
+    "source_trace": [
+      {
+        "file": "tinydb/table.py",
+        "line_start": 139,
+        "line_end": 177,
+        "symbol": "Table.insert",
+        "role": "entrypoint"
+      },
+      {
+        "file": "tinydb/table.py",
+        "line_start": 804,
+        "line_end": 854,
+        "symbol": "Table._update_table",
+        "role": "propagation"
+      },
+      {
+        "file": "tinydb/storages.py",
+        "line_start": 125,
+        "line_end": 161,
+        "symbol": "JSONStorage.read / write",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "python examples/case-study-audit/reproducers/tinydb_chaos_benchmark.py --tinydb-path <cloned-tinydb> --trials 50",
+      "test_file": "reproducers/tinydb_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 50,
+      "observed_failure_output": "50/50 trials violated (100.0%): 4 threads calling db.insert() x5 caused 989 lost documents, 629 exceptions (620x JSONDecodeError, 9x ValueError), and 43 corrupt JSON files on disk."
+    },
+    "disprover_notes": "Audited storages.py, table.py, and database.py; zero threading.Lock, RLock, or file locking primitives exist anywhere in TinyDB.",
+    "minimal_fix": "Wrap Storage read/write/close and Table mutation/query operations in reentrant threading.RLock (see ThreadSafeAtomicJSONStorage + ThreadSafeTable in docs/CASE-STUDY.md).",
+    "regression_test_strategy": "Run 50-trial 4-thread barrier insert test asserting 0% violations, 20/20 persisted docs per trial, and 0 JSONDecodeError exceptions."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-tinydb-upsert-toctou-002",
+    "fault_unit_ids": ["fu-tinydb-upsert-toctou-002"],
+    "title": "Compound update-then-insert in Table.upsert suffers TOCTOU duplicate row creation even with thread-safe storage",
+    "failure_class": "toctou_race",
+    "severity": "high",
+    "blast_radius": "Fixing JSONStorage locking alone still allows concurrent Table.upsert() calls on identical natural keys to both observe updated_docs=[] and both fall through to insert(), creating up to 4x duplicate rows.",
+    "trigger_likelihood": "High whenever multiple threads initialize or update keyed records concurrently via upsert().",
+    "broken_invariant": "Concurrent Table.upsert() calls matching the same query key must produce exactly one logical document without creating duplicates.",
+    "root_cause": "Table.upsert executes self.update(document, cond, doc_ids) at tinydb/table.py:615 and checks if updated_docs is empty before calling self.insert(document) at line 623 as two separate _update_table() transactions with no table-level mutex spanning both steps.",
+    "source_trace": [
+      {
+        "file": "tinydb/table.py",
+        "line_start": 591,
+        "line_end": 623,
+        "symbol": "Table.upsert",
+        "role": "entrypoint"
+      },
+      {
+        "file": "tinydb/table.py",
+        "line_start": 458,
+        "line_end": 510,
+        "symbol": "Table.update",
+        "role": "propagation"
+      },
+      {
+        "file": "tinydb/table.py",
+        "line_start": 139,
+        "line_end": 177,
+        "symbol": "Table.insert",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "python examples/case-study-audit/reproducers/tinydb_chaos_benchmark.py --tinydb-path <cloned-tinydb> --trials 50",
+      "test_file": "reproducers/tinydb_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 38,
+      "observed_failure_output": "38/50 trials violated (76.0%) against ThreadSafeAtomicJSONStorage: 4 concurrent threads upserting 3 natural keys created 60 duplicate rows (max 4x copies for one key) and 12 duplicate-ID ValueErrors."
+    },
+    "disprover_notes": "Confirmed storage-level locking serializes each call individually but releases between self.update() and self.insert(), leaving the compound TOCTOU window wide open.",
+    "minimal_fix": "Protect Table.upsert (alongside insert/update/remove/read) with a per-Table threading.RLock so check-update-or-insert runs atomically.",
+    "regression_test_strategy": "Run 50-trial 4-thread barrier upsert() benchmark against ThreadSafeAtomicJSONStorage asserting 0 duplicate rows across all keys."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-tinydb-nonatomic-write-003",
+    "fault_unit_ids": ["fu-tinydb-nonatomic-write-003"],
+    "title": "In-place seek(0)->write->truncate in JSONStorage.write destroys previously committed DB on mid-write ENOSPC/EIO",
+    "failure_class": "non_atomic_file_write",
+    "severity": "high",
+    "blast_radius": "Any partial write or ENOSPC error overwrites the live database file prefix at byte 0 before trailing old bytes remain intact, rendering the entire JSON file unparseable and destroying 100% of prior records.",
+    "trigger_likelihood": "Medium-High on full disks, quota limits, container ephemeral-storage eviction, or process crashes during DB serialization.",
+    "broken_invariant": "Previously committed DB records on disk must remain valid and intact if JSONStorage.write() encounters a mid-write I/O or ENOSPC failure.",
+    "root_cause": "JSONStorage.write seeks self._handle back to byte 0 and writes directly over the live database file prior to calling flush/fsync/truncate instead of staging into a sibling temp file and atomically replacing via os.replace().",
+    "source_trace": [
+      {
+        "file": "tinydb/table.py",
+        "line_start": 850,
+        "line_end": 852,
+        "symbol": "Table._update_table",
+        "role": "entrypoint"
+      },
+      {
+        "file": "tinydb/storages.py",
+        "line_start": 142,
+        "line_end": 162,
+        "symbol": "JSONStorage.write",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "fault_injection",
+      "command": "python examples/case-study-audit/reproducers/tinydb_chaos_benchmark.py --tinydb-path <cloned-tinydb> --trials 50",
+      "test_file": "reproducers/tinydb_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 50,
+      "observed_failure_output": "50/50 trials corrupted (100.0%): injecting ENOSPC after 32 bytes destroyed all 20 previously committed documents in every trial (0/50 valid JSON files recovered)."
+    },
+    "disprover_notes": "Verified os.fsync and truncate happen after in-place write(serialized) overwrites the live handle starting at offset 0.",
+    "minimal_fix": "Write serialized JSON to a sibling temporary file, flush and os.fsync the temp descriptor, close the live handle on Windows if open, and swap atomically via os.replace(tmp_path, path).",
+    "regression_test_strategy": "Keep mid-write ENOSPC partial-write injection test asserting 100% committed record preservation and 0 stray .tmp files."
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "fp-tinydb-dir-fsync-004",
+    "fault_unit_ids": ["fu-tinydb-dir-fsync-004"],
+    "title": "touch() creates database files without fsyncing parent directory metadata",
+    "failure_class": "missing_dir_fsync",
+    "severity": null,
+    "broken_invariant": "Newly created database files and parent directories must survive sudden OS power loss without losing directory entries.",
+    "root_cause": "touch() in tinydb/storages.py opens a newly created file in 'a' mode and exits without opening and fsyncing the parent directory file descriptor on POSIX filesystems.",
+    "source_trace": [
+      {
+        "file": "tinydb/storages.py",
+        "line_start": 16,
+        "line_end": 33,
+        "symbol": "touch",
+        "role": "sink"
+      }
+    ],
+    "unresolved_fact": "Whether parent directory entry loss triggers cleanly on ext4/xfs/APFS under abrupt VM power-off without OS block-layer fault injection.",
+    "why_blocked": "Userland Python fault injection cannot interrupt POSIX directory-entry metadata journaling between open(O_CREAT) and directory flush.",
+    "safe_verification_recipe": "Run inside an isolated QEMU/dm-flakey Linux VM: create new TinyDB file, simulate sudden power-cut before sync, remount filesystem, and verify file presence."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "fp-tinydb-remove-iter-005",
+    "fault_unit_ids": ["fu-tinydb-remove-iter-005"],
+    "title": "Candidate iterator invalidation (RuntimeError: dictionary changed size during iteration) in Table.remove(cond=...)",
+    "failure_class": "iterator_invalidation",
+    "severity": null,
+    "disprover_evidence": "Table.remove iterates over list(table.keys()) rather than table.items(), snapshotting keys prior to table.pop(doc_id). Executed 50 trials inserting 200 docs and removing 100 matching docs: 0 RuntimeErrors across 50/50 trials.",
+    "mitigating_guard_location": {
+      "file": "tinydb/table.py",
+      "line_start": 683,
+      "line_end": 690,
+      "symbol": "Table.remove (cond updater)"
+    },
+    "rejection_reason": "Explicit list(table.keys()) key snapshot prevents dictionary mutation during predicate evaluation and removal."
+  }
+]

@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "run_id": "huey-case-study-001",
+  "target_commit": "7ea73730b9b6d413effdd67880970eb3e674974c",
+  "units": [
+    {
+      "fault_unit_id": "fu-huey-peek-toctou-001",
+      "canonical_refs": {
+        "surface": "FileStorage.peek_data vs. pop_data",
+        "state_store": "FileStorage.result_path",
+        "subsystem": "file-storage",
+        "failure_class": "toctou_race"
+      },
+      "invariant": "FileStorage.peek_data() must acquire self.lock to honor FileStorage's exclusive-lock guarantee and prevent TOCTOU open failures when pop_data() unlinks keys.",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "FILESYSTEM-IPC-AND-SHUTDOWN.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md", "AI-AGENTS-AND-LLM-PIPELINES.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-huey-1",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Executed 50x 4-thread barrier trials (peek_data vs put_data/pop_data, 110 ops/thread) in reproducers/huey_chaos_benchmark.py."
+      ],
+      "result_fingerprints": ["fp-huey-peek-toctou-001"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-huey-enqueued-toctou-002",
+      "canonical_refs": {
+        "surface": "FileStorage.enqueued_items vs. dequeue",
+        "state_store": "FileStorage.queue_path",
+        "subsystem": "file-storage",
+        "failure_class": "toctou_race"
+      },
+      "invariant": "FileStorage.enqueued_items() must acquire self.lock so queue inspection never tries to open task files simultaneously unlinked by dequeue().",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "QUEUES-WEBHOOKS-AND-WORKERS.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-huey-2",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Executed 50x 4-thread barrier trials (enqueued_items vs enqueue/dequeue, 45 ops/thread) in reproducers/huey_chaos_benchmark.py."
+      ],
+      "result_fingerprints": ["fp-huey-enqueued-toctou-002"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-huey-result-items-toctou-003",
+      "canonical_refs": {
+        "surface": "FileStorage.result_items vs. put_data/pop_data",
+        "state_store": "FileStorage.result_path",
+        "subsystem": "file-storage",
+        "failure_class": "toctou_race"
+      },
+      "invariant": "FileStorage.result_items() must acquire self.lock when walking result_path and reading files to prevent PermissionError/FileNotFoundError races.",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["FAILURE-CLASSES.md", "FILESYSTEM-IPC-AND-SHUTDOWN.md"],
+      "excluded_playbooks": ["AI-AGENTS-AND-LLM-PIPELINES.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "candidate",
+      "agent_id": "hunter-huey-3",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Executed 50x 4-thread barrier trials (result_items vs put_data/pop_data, 35 ops/thread) in reproducers/huey_chaos_benchmark.py."
+      ],
+      "result_fingerprints": ["fp-huey-result-items-toctou-003"],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-huey-file-fsync-004",
+      "canonical_refs": {
+        "surface": "FileStorage._put_data",
+        "state_store": "FileStorage.result_path",
+        "subsystem": "persistence",
+        "failure_class": "missing_fsync_before_replace"
+      },
+      "invariant": "Newly written temp result files must have data blocks flushed via os.fsync before os.replace so a power loss never produces an empty replacement file.",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["FILESYSTEM-IPC-AND-SHUTDOWN.md"],
+      "excluded_playbooks": ["STATE-AND-FRONTEND-CONCURRENCY.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "blocked",
+      "agent_id": "hunter-huey-4",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Inspected FileStorage._put_data at huey/storage.py:1552-1558; calls os.replace(tmp, filename) without fh.flush() or os.fsync(fh.fileno())."
+      ],
+      "result_fingerprints": ["fp-huey-file-fsync-004"],
+      "unresolved": [
+        "Reproducing post-rename zero-byte data loss on delayed allocation filesystems requires block-device power-cut / dm-flakey injection."
+      ]
+    },
+    {
+      "fault_unit_id": "fu-huey-sqlite-dequeue-005",
+      "canonical_refs": {
+        "surface": "SqliteStorage.dequeue",
+        "state_store": "SqliteStorage.task_table",
+        "subsystem": "sqlite-storage",
+        "failure_class": "concurrent_double_delivery"
+      },
+      "invariant": "Concurrent worker threads calling SqliteStorage.dequeue() must deliver every queued task at most once without duplicates or lost tasks.",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["QUEUES-WEBHOOKS-AND-WORKERS.md", "DATABASE-AND-TRANSACTIONS.md"],
+      "excluded_playbooks": ["AI-AGENTS-AND-LLM-PIPELINES.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "covered",
+      "agent_id": "hunter-huey-5",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Disprover verified BaseSqlStorage.db self.lock + begin exclusive at huey/storage.py:821-852,936-950 and ran 50x 4-thread drain trials (0 duplicates, 0 errors)."
+      ],
+      "result_fingerprints": [],
+      "unresolved": []
+    },
+    {
+      "fault_unit_id": "fu-huey-memory-iter-006",
+      "canonical_refs": {
+        "surface": "MemoryStorage.result_items",
+        "state_store": "MemoryStorage._results",
+        "subsystem": "memory-storage",
+        "failure_class": "iterator_invalidation"
+      },
+      "invariant": "Concurrent MemoryStorage.result_items() vs. put_data()/pop_data() must not raise RuntimeError: dictionary changed size during iteration under standard CPython.",
+      "starting_paths": ["huey/storage.py"],
+      "selected_playbooks": ["FAILURE-CLASSES.md"],
+      "excluded_playbooks": ["FILESYSTEM-IPC-AND-SHUTDOWN.md"],
+      "prior_status": "none",
+      "attempts": [],
+      "wave": 1,
+      "status": "covered",
+      "agent_id": "hunter-huey-6",
+      "reviewed_paths": ["huey/storage.py"],
+      "reproducer_checks": [
+        "Disprover ran 50x 4-thread barrier trials (result_items vs put_data/pop_data): 0/50 RuntimeErrors because CPython PyDict_Copy executes atomically under the GIL."
+      ],
+      "result_fingerprints": [],
+      "unresolved": []
+    }
+  ]
+}

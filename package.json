@@ -1,0 +1,40 @@
+{
+  "name": "chaos-audit-skill",
+  "version": "1.0.0",
+  "description": "Adversarial reliability & chaos engineering skill for Claude Code, Codex, Cursor, Antigravity, and Gemini CLI. 6 phases, 7 playbooks, 38 failure classes, zero npm deps. Every confirmed bug is proven by an executed failing reproducer.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Treamyracle/chaos-audit-skill.git"
+  },
+  "homepage": "https://github.com/Treamyracle/chaos-audit-skill#readme",
+  "bugs": {
+    "url": "https://github.com/Treamyracle/chaos-audit-skill/issues"
+  },
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "antigravity",
+    "cursor",
+    "chaos-engineering",
+    "concurrency",
+    "race-condition",
+    "reliability",
+    "idempotency"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "test:validators": "node --test skills/chaos-audit/validate-fault-ledger.test.cjs skills/chaos-audit/validate-findings.test.cjs",
+    "test:reproducers": "node --test examples/vulnerable-checkout/reproducers/double-spend.repro.test.cjs examples/vulnerable-checkout/reproducers/webhook-duplicate.repro.test.cjs examples/vulnerable-checkout/reproducers/timeout-hang.repro.test.cjs",
+    "benchmark": "node examples/vulnerable-checkout/benchmark.cjs --trials 50 --assert",
+    "benchmark:write": "node examples/vulnerable-checkout/benchmark.cjs --trials 50 --out examples/benchmark-results/before-after.json --assert",
+    "validate:sample": "node skills/chaos-audit/validate-fault-ledger.cjs --repo-root examples/vulnerable-checkout examples/sample-audit-output/fault-ledger.json && node skills/chaos-audit/validate-findings.cjs --repo-root examples/vulnerable-checkout --ledger examples/sample-audit-output/fault-ledger.json examples/sample-audit-output/findings.json",
+    "validate:case-study": "node skills/chaos-audit/validate-fault-ledger.cjs examples/case-study-audit/fault-ledger.json && node skills/chaos-audit/validate-findings.cjs --artifacts-root examples/case-study-audit --ledger examples/case-study-audit/fault-ledger.json examples/case-study-audit/findings.json",
+    "validate:huey": "node skills/chaos-audit/validate-fault-ledger.cjs examples/case-study-huey/fault-ledger.json && node skills/chaos-audit/validate-findings.cjs --artifacts-root examples/case-study-huey --ledger examples/case-study-huey/fault-ledger.json examples/case-study-huey/findings.json",
+    "check:repo": "node scripts/check-repo.cjs",
+    "test": "node --test skills/chaos-audit/validate-fault-ledger.test.cjs skills/chaos-audit/validate-findings.test.cjs examples/vulnerable-checkout/reproducers/double-spend.repro.test.cjs examples/vulnerable-checkout/reproducers/webhook-duplicate.repro.test.cjs examples/vulnerable-checkout/reproducers/timeout-hang.repro.test.cjs && node examples/vulnerable-checkout/benchmark.cjs --trials 50 --assert && node scripts/check-repo.cjs"
+  }
+}

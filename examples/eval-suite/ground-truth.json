@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "target": "examples/eval-suite/order-worker",
+  "created_after_blind_eval": true,
+  "primary_bugs": [
+    {
+      "id": "B1",
+      "failure_class": "toctou_race",
+      "surface": "POST /reserve",
+      "file": "server.js",
+      "lines": [47, 63],
+      "description": "Checks store.getStock(sku) before yielding across verifyPaymentAuth(), allowing concurrent requests to oversell inventory negative."
+    },
+    {
+      "id": "B2",
+      "failure_class": "non_idempotent_retry",
+      "surface": "POST /webhooks/fulfillment",
+      "file": "server.js",
+      "lines": [66, 78],
+      "description": "Never checks store.hasFulfillment(deliveryId) or in-flight deliveries, double-crediting loyaltyPoints on retries."
+    },
+    {
+      "id": "B3",
+      "failure_class": "missing_timeout",
+      "surface": "GET /shipping-quote",
+      "file": "server.js",
+      "lines": [80, 91],
+      "description": "Calls http.get(carrierQuoteUrl) without timeout or AbortSignal, hanging indefinitely when upstream carrier stalls."
+    },
+    {
+      "id": "B4",
+      "failure_class": "overlapping_cron",
+      "surface": "startReconciler (setInterval)",
+      "file": "reconciler.js",
+      "lines": [3, 11],
+      "description": "Async setInterval callback lacks re-entrancy guard or in-flight state transition, double-dispatching slow payouts."
+    }
+  ],
+  "safe_guarded_decoys": [
+    {
+      "id": "G1",
+      "surface": "POST /cancel",
+      "file": "server.js",
+      "lines": [93, 109],
+      "guard": "Synchronous store.inFlightCancels.has(orderId) || store.isCancelled(orderId) + add(orderId) before await delay(25) with try/finally delete."
+    },
+    {
+      "id": "G2",
+      "surface": "GET /carrier-health",
+      "file": "server.js",
+      "lines": [111, 125],
+      "guard": "Uses fetch(carrierHealthUrl, { signal: AbortSignal.timeout(healthTimeoutMs) }) inside try/catch returning 503 degraded fallback."
+    }
+  ]
+}

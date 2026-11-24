@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-labelledby="arch-title">
+  <title id="arch-title">Six-phase adversarial loop with mechanical validation gates</title>
+  <defs>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#525B69"/>
+    </marker>
+    <marker id="arrow-teal" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0F766E"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="340" rx="14" fill="#F6F4EF" stroke="#CFC8BA" stroke-width="1.5"/>
+
+  <text x="44" y="42" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing="2">PIPELINE ARCHITECTURE  ·  6 PHASES  ·  2 DETERMINISTIC GATES</text>
+  <text x="44" y="72" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">Six-phase adversarial loop with zero-dependency schema gates</text>
+
+  <!-- Connectors drawn BEFORE node boxes for clean z-order -->
+  <g stroke="#525B69" stroke-width="1.5" fill="none" marker-end="url(#arrow-muted)">
+    <line x1="210" y1="158" x2="231" y2="158"/>
+    <line x1="399" y1="158" x2="420" y2="158"/>
+    <line x1="588" y1="158" x2="609" y2="158"/>
+    <line x1="777" y1="158" x2="798" y2="158"/>
+    <line x1="966" y1="158" x2="987" y2="158"/>
+  </g>
+  <g stroke="#0F766E" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrow-teal)">
+    <line x1="127" y1="256" x2="127" y2="225"/>
+    <line x1="694" y1="256" x2="694" y2="225"/>
+  </g>
+
+  <!-- Phase 1 -->
+  <rect x="44" y="96" width="166" height="124" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <text x="62" y="122" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">01 / RECON</text>
+  <text x="62" y="150" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Map Surface</text>
+  <text x="62" y="178" fill="#525B69" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13">4 parallel agents</text>
+  <text x="62" y="200" fill="#737C8C" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">fault-ledger.json</text>
+
+  <!-- Phase 2 -->
+  <rect x="233" y="96" width="166" height="124" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <text x="251" y="122" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">02 / HUNT</text>
+  <text x="251" y="150" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Chaos Hunting</text>
+  <text x="251" y="178" fill="#525B69" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13">7 playbooks · 38 cls</text>
+  <text x="251" y="200" fill="#737C8C" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">+ Coverage Critic</text>
+
+  <!-- Phase 3 (Focal Accent #1) -->
+  <rect x="422" y="96" width="166" height="124" rx="8" fill="#F9E6E2" stroke="#C83E2B" stroke-width="2"/>
+  <text x="440" y="122" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">03 / DISPROVE</text>
+  <text x="440" y="150" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Adversarial</text>
+  <text x="440" y="178" fill="#232830" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13">Try to disprove first,</text>
+  <text x="440" y="200" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">then fail live test</text>
+
+  <!-- Phase 4 (Focal Accent #2) -->
+  <rect x="611" y="96" width="166" height="124" rx="8" fill="#14161A" stroke="#14161A" stroke-width="1.5"/>
+  <text x="629" y="122" fill="#F9E6E2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">04 / GATE</text>
+  <text x="629" y="150" fill="#F6F4EF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Schema Check</text>
+  <text x="629" y="178" fill="#D6D0C4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">findings.json</text>
+  <text x="629" y="200" fill="#5EEAD4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">runs_failed &gt;= 1</text>
+
+  <!-- Phase 5 -->
+  <rect x="800" y="96" width="166" height="124" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <text x="818" y="122" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">05 / VERIFY</text>
+  <text x="818" y="150" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Fresh QA</text>
+  <text x="818" y="178" fill="#525B69" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13">Re-checks file:line</text>
+  <text x="818" y="200" fill="#737C8C" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">&amp; exit outputs</text>
+
+  <!-- Phase 6 -->
+  <rect x="989" y="96" width="166" height="124" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <text x="1007" y="122" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">06 / REPORT</text>
+  <text x="1007" y="150" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="700">Neutral Docs</text>
+  <text x="1007" y="178" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">REPORT.md</text>
+  <text x="1007" y="200" fill="#737C8C" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">REPRODUCERS.md</text>
+
+  <!-- Bottom mechanical validation strips -->
+  <rect x="44" y="256" width="544" height="54" rx="6" fill="#ECE8DF" stroke="#CFC8BA" stroke-width="1"/>
+  <rect x="44" y="256" width="5" height="54" fill="#0F766E"/>
+  <text x="64" y="278" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">MECHANICAL GATE 01 · LEDGER COVERAGE</text>
+  <text x="64" y="298" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">node skills/chaos-audit/validate-fault-ledger.cjs --repo-root</text>
+
+  <rect x="611" y="256" width="544" height="54" rx="6" fill="#ECE8DF" stroke="#CFC8BA" stroke-width="1"/>
+  <rect x="611" y="256" width="5" height="54" fill="#0F766E"/>
+  <text x="631" y="278" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">MECHANICAL GATE 02 · EVIDENCE &amp; LINE BOUNDS</text>
+  <text x="631" y="298" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">node skills/chaos-audit/validate-findings.cjs --repo-root --ledger</text>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">chaos-audit — Adversarial Reliability Skill</title>
+  <desc id="hero-desc">Editorial diagram illustrating concurrent TOCTOU double-spend collision vs keyed lock isolation across 6 phases and 300 live trials.</desc>
+  <defs>
+    <pattern id="swiss-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 H 0 V 40" fill="none" stroke="#D6D0C4" stroke-width="1" stroke-opacity="0.4"/>
+    </pattern>
+  </defs>
+
+  <!-- Archival technical plate -->
+  <rect width="1200" height="380" rx="14" fill="#F6F4EF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <rect x="1" y="1" width="1198" height="378" rx="13" fill="url(#swiss-grid)"/>
+
+  <!-- Left editorial typography column -->
+  <text x="56" y="64" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" letter-spacing="2">ADVERSARIAL RELIABILITY SKILL  ·  ZERO NPM DEPS</text>
+  <rect x="56" y="78" width="52" height="5" fill="#C83E2B"/>
+
+  <text x="56" y="156" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, sans-serif" font-size="72" font-weight="800" letter-spacing="-2.5">chaos-audit</text>
+
+  <text x="56" y="206" fill="#232830" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, sans-serif" font-size="21" font-weight="500">Hunt race conditions, duplicate retries &amp; hangs.</text>
+  <text x="56" y="238" fill="#525B69" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, sans-serif" font-size="21" font-weight="500">Every confirmed bug fails in an executed test.</text>
+
+  <line x1="56" y1="278" x2="594" y2="278" stroke="#D6D0C4" stroke-width="1.5"/>
+
+  <text x="56" y="310" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700">06 PHASES  /  07 PLAYBOOKS  /  38 CLASSES  /  300 TRIALS</text>
+  <text x="56" y="338" fill="#737C8C" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">Claude Code · Codex · Cursor · Antigravity · Gemini CLI</text>
+
+  <!-- Right project-native specimen card: Live TOCTOU collision schematic -->
+  <rect x="636" y="32" width="516" height="316" rx="10" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <path d="M646,32 H1142 Q1152,32 1152,42 V72 H636 V42 Q636,32 646,32 Z" fill="#ECE8DF"/>
+  <line x1="636" y1="72" x2="1152" y2="72" stroke="#D6D0C4" stroke-width="1"/>
+  <text x="656" y="57" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">RACE TRACE · POST /checkout ($100)</text>
+  <text x="1132" y="57" text-anchor="end" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">TOCTOU COLLISION</text>
+
+  <!-- Shaded async race window -->
+  <rect x="778" y="88" width="166" height="142" fill="#F9E6E2"/>
+  <line x1="778" y1="106" x2="778" y2="230" stroke="#C83E2B" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="944" y1="106" x2="944" y2="230" stroke="#C83E2B" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <text x="778" y="100" text-anchor="middle" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">t=0 read</text>
+  <text x="861" y="100" text-anchor="middle" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700">await 40ms</text>
+  <text x="944" y="100" text-anchor="middle" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">commit</text>
+
+  <!-- Track A -->
+  <text x="656" y="142" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">REQ A -$80</text>
+  <line x1="748" y1="138" x2="1002" y2="138" stroke="#14161A" stroke-width="2"/>
+  <circle cx="778" cy="138" r="5" fill="#FFFFFF" stroke="#14161A" stroke-width="2"/>
+  <circle cx="944" cy="138" r="5" fill="#C83E2B"/>
+  <text x="1132" y="142" text-anchor="end" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">200 OK ($20)</text>
+
+  <!-- Track B -->
+  <text x="656" y="196" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">REQ B -$80</text>
+  <line x1="748" y1="192" x2="1002" y2="192" stroke="#14161A" stroke-width="2"/>
+  <circle cx="778" cy="192" r="5" fill="#FFFFFF" stroke="#14161A" stroke-width="2"/>
+  <circle cx="944" cy="192" r="5" fill="#C83E2B"/>
+  <text x="1132" y="196" text-anchor="end" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">200 OK (-$60)</text>
+
+  <!-- Bottom Before / After ledger strip -->
+  <line x1="656" y1="248" x2="1132" y2="248" stroke="#D6D0C4" stroke-width="1"/>
+  <circle cx="670" cy="272" r="4" fill="#C83E2B"/>
+  <text x="684" y="276" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">BEFORE unpatched</text>
+  <text x="1122" y="276" text-anchor="end" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">-$4,000 drift · 50/50 fail</text>
+
+  <rect x="656" y="294" width="476" height="34" rx="6" fill="#E2F2F0"/>
+  <circle cx="670" cy="311" r="4" fill="#0F766E"/>
+  <text x="684" y="315" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">AFTER keyed mutex</text>
+  <text x="1122" y="315" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">200+409 · $0 drift · 0/50 fail</text>
+</svg>

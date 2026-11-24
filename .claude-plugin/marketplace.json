@@ -1,0 +1,16 @@
+{
+  "name": "Treamyracle",
+  "description": "Chaos Audit Skill: six-phase adversarial reliability, concurrency, and failure-mode auditing for coding agents",
+  "owner": {
+    "name": "Treamyracle",
+    "url": "https://github.com/Treamyracle"
+  },
+  "plugins": [
+    {
+      "name": "chaos-audit",
+      "source": "./",
+      "description": "Turns your coding agent into a principal chaos and reliability engineer: hunts TOCTOU races, non-idempotent retries, deadlocks, pool starvation, and LLM tool-loop bugs, verified by deterministic failing reproducers.",
+      "category": "developer-tools"
+    }
+  ]
+}

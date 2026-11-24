@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "benchmark": "vulnerable-checkout",
+  "generated_at": "2026-11-24T01:48:39.776Z",
+  "environment": {
+    "node_version": "v26.13.1",
+    "platform": "win32",
+    "arch": "x64",
+    "cpus": 16
+  },
+  "trials_per_scenario": 50,
+  "total_trials": 150,
+  "duration_ms": 5072,
+  "scenarios": {
+    "double_spend": {
+      "endpoint": "POST /checkout",
+      "failure_class": "toctou_race",
+      "before": {
+        "trials": 50,
+        "invariant_violations": 50,
+        "violation_rate_pct": 100,
+        "unauthorized_spend_usd": 4000,
+        "overdraft_debt_usd": 3000,
+        "min_wallet_balance_usd": -60,
+        "status_counts": {
+          "200": 100
+        },
+        "latency_ms": {
+          "samples": 100,
+          "p50": 59.54,
+          "p95": 112.92,
+          "p99": 113.91,
+          "max": 146.24
+        }
+      },
+      "after": {
+        "trials": 50,
+        "invariant_violations": 0,
+        "violation_rate_pct": 0,
+        "unauthorized_spend_usd": 0,
+        "overdraft_debt_usd": 0,
+        "min_wallet_balance_usd": 20,
+        "status_counts": {
+          "200": 50,
+          "409": 50
+        },
+        "latency_ms": {
+          "samples": 100,
+          "p50": 61.94,
+          "p95": 91.33,
+          "p99": 98.01,
+          "max": 98.26
+        }
+      }
+    },
+    "duplicate_webhook": {
+      "endpoint": "POST /webhooks/payment",
+      "failure_class": "non_idempotent_retry",
+      "before": {
+        "trials": 50,
+        "invariant_violations": 50,
+        "violation_rate_pct": 100,
+        "duplicate_credit_drift_usd": 2500,
+        "max_wallet_balance_usd": 100,
+        "status_counts": {
+          "200": 100
+        },
+        "latency_ms": {
+          "samples": 100,
+          "p50": 29.86,
+          "p95": 48.29,
+          "p99": 48.45,
+          "max": 48.63
+        }
+      },
+      "after": {
+        "trials": 50,
+        "invariant_violations": 0,
+        "violation_rate_pct": 0,
+        "duplicate_credit_drift_usd": 0,
+        "max_wallet_balance_usd": 50,
+        "status_counts": {
+          "200": 100
+        },
+        "latency_ms": {
+          "samples": 100,
+          "p50": 21.12,
+          "p95": 48.09,
+          "p99": 61.53,
+          "max": 62.1
+        }
+      }
+    },
+    "upstream_hang": {
+      "endpoint": "GET /recommendations",
+      "failure_class": "missing_timeout",
+      "before": {
+        "trials": 50,
+        "hang_count": 50,
+        "hang_rate_pct": 100,
+        "graceful_fallback_count": 0,
+        "graceful_fallback_rate_pct": 0,
+        "leaked_upstream_sockets": 50,
+        "status_counts": {
+          "TimeoutError": 50
+        },
+        "latency_ms": {
+          "samples": 50,
+          "p50": 307.95,
+          "p95": 313.12,
+          "p99": 313.22,
+          "max": 313.22
+        }
+      },
+      "after": {
+        "trials": 50,
+        "hang_count": 0,
+        "hang_rate_pct": 0,
+        "graceful_fallback_count": 50,
+        "graceful_fallback_rate_pct": 100,
+        "leaked_upstream_sockets": 0,
+        "status_counts": {
+          "504": 50
+        },
+        "latency_ms": {
+          "samples": 50,
+          "p50": 129.14,
+          "p95": 144.05,
+          "p99": 144.64,
+          "max": 144.64
+        }
+      }
+    }
+  }
+}

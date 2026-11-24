@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [20, 22, 24]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run validator unit tests
+        run: node --test skills/chaos-audit/validate-fault-ledger.test.cjs skills/chaos-audit/validate-findings.test.cjs
+
+      - name: Run vulnerable-checkout reproducer tests
+        run: node --test examples/vulnerable-checkout/reproducers/double-spend.repro.test.cjs examples/vulnerable-checkout/reproducers/webhook-duplicate.repro.test.cjs examples/vulnerable-checkout/reproducers/timeout-hang.repro.test.cjs
+
+      - name: Run 50-trial Before vs. After chaos benchmark
+        run: node examples/vulnerable-checkout/benchmark.cjs --trials 50 --assert
+
+      - name: Validate sample audit ledger & findings against vulnerable-checkout
+        run: |
+          node skills/chaos-audit/validate-fault-ledger.cjs --repo-root examples/vulnerable-checkout examples/sample-audit-output/fault-ledger.json
+          node skills/chaos-audit/validate-findings.cjs --repo-root examples/vulnerable-checkout --ledger examples/sample-audit-output/fault-ledger.json examples/sample-audit-output/findings.json
+
+      - name: Validate case-study audit ledger & findings
+        run: |
+          node skills/chaos-audit/validate-fault-ledger.cjs examples/case-study-audit/fault-ledger.json
+          node skills/chaos-audit/validate-findings.cjs --artifacts-root examples/case-study-audit --ledger examples/case-study-audit/fault-ledger.json examples/case-study-audit/findings.json
+
+      - name: Validate Huey case-study audit ledger & findings
+        run: |
+          node skills/chaos-audit/validate-fault-ledger.cjs examples/case-study-huey/fault-ledger.json
+          node skills/chaos-audit/validate-findings.cjs --artifacts-root examples/case-study-huey --ledger examples/case-study-huey/fault-ledger.json examples/case-study-huey/findings.json
+
+      - name: Syntax-check blind eval target
+        run: |
+          node --check examples/eval-suite/order-worker/store.js
+          node --check examples/eval-suite/order-worker/server.js
+          node --check examples/eval-suite/order-worker/reconciler.js
+
+      - name: Verify manifests, SVGs, and markdown links
+        run: node scripts/check-repo.cjs

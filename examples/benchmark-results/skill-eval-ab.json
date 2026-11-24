@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "eval": "blind-ab-order-worker",
+  "target": "examples/eval-suite/order-worker",
+  "evaluated_at": "2026-11-24T08:15:00Z",
+  "runtime": {
+    "node_version": "v26.13.1",
+    "platform": "win32"
+  },
+  "methodology": {
+    "design": "Two fresh isolated subagents on the identical underlying model audited the same unseen 3-file Node.js service (4 primary bugs + 2 safe guarded decoys, zero hint comments). ground-truth.json was written only after both arms completed.",
+    "control_isolation": "Restricted to reading only examples/eval-suite/order-worker/{store.js,server.js,reconciler.js}; no skill files accessed.",
+    "treatment_isolation": "Instructed to follow skills/chaos-audit/SKILL.md and validators; blocked from reading examples/sample-audit-output/, examples/vulnerable-checkout/, or case-study directories."
+  },
+  "control_without_skill": {
+    "primary_bugs_recalled": 4,
+    "primary_bugs_total": 4,
+    "primary_recall_pct": 100.0,
+    "guarded_decoys_falsely_flagged": 0,
+    "guarded_decoys_total": 2,
+    "guard_false_positive_pct": 0.0,
+    "total_confirmed_bugs": 10,
+    "formal_rejected_hypotheses": 0,
+    "repeatable_node_test_suites": 0,
+    "repeatable_test_runs_executed": 0,
+    "ad_hoc_scripts_run": 2,
+    "hung_scripts_terminated": 1,
+    "ledger_units": 0,
+    "ledger_coverage_pct": 0.0,
+    "schema_and_line_gate_passed": false,
+    "notes": "Single-pass review spotted all 4 primary bugs plus 6 secondary defects and verified safe concurrency/timeout guards informally in ad-hoc console scripts (one hung script terminated manually)."
+  },
+  "treatment_with_chaos_audit": {
+    "primary_bugs_recalled": 4,
+    "primary_bugs_total": 4,
+    "primary_recall_pct": 100.0,
+    "guarded_decoys_falsely_flagged": 0,
+    "guarded_decoys_total": 2,
+    "guard_false_positive_pct": 0.0,
+    "total_confirmed_bugs": 17,
+    "additional_bugs_over_control": 7,
+    "formal_rejected_hypotheses": 3,
+    "empirical_subclaims_disproved": 3,
+    "repeatable_node_test_suites": 20,
+    "confirmed_failing_repro_suites": 17,
+    "guard_verification_suites": 3,
+    "repeatable_test_runs_executed": 60,
+    "hung_scripts_terminated": 0,
+    "ledger_units": 16,
+    "ledger_coverage_pct": 100.0,
+    "schema_and_line_gate_passed": true,
+    "validator_outputs": {
+      "fault_ledger": "VALID fault-ledger: 16 unit(s), coverage=100% (covered=2, candidate=14, blocked=0, planned=0)",
+      "findings": "VALID findings: 20 record(s) (confirmed=17, needs_validation=0, rejected=3)",
+      "phase5_qa_passed": true
+    },
+    "notes": "Coverage Critic and 6-phase loop uncovered +7 additional confirmed failure modes (hung dispatchPayout starving healthy payouts, non-scalar orderId bypassing POST /cancel Set.has/=== dedup, 4 MiB inbound/outbound HTTP buffering, negative/NaN webhook points, post-disconnect store mutations) while formally disproving 3 false-positive candidates/sub-claims and shipping 20 repeatable node --test suites."
+  },
+  "measured_skill_delta": {
+    "primary_recall_delta_pct": 0.0,
+    "guard_false_positive_delta_pct": 0.0,
+    "confirmed_bugs_delta_count": 7,
+    "confirmed_bugs_delta_pct": 70.0,
+    "repeatable_node_test_suites_delta": 20,
+    "ledger_coverage_delta_pct": 100.0
+  }
+}

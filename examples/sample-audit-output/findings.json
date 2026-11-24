@@ -1,0 +1,164 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-checkout-toctou-001",
+    "fault_unit_ids": ["fu-checkout-wallet-001"],
+    "title": "TOCTOU double-spend race in POST /checkout allows negative wallet balance",
+    "failure_class": "toctou_race",
+    "severity": "critical",
+    "blast_radius": "Any user can spend multiples of their wallet balance concurrently, driving balance negative (-60 on a 100 balance) and creating duplicate fulfilled orders.",
+    "trigger_likelihood": "High: reproducible 100% of the time with just 2 simultaneous HTTP requests.",
+    "broken_invariant": "Wallet balance must never become negative and total debited orders must never exceed initial balance under concurrent requests.",
+    "root_cause": "POST /checkout reads store.getBalance(userId) before yielding the event loop at await delay(40), then re-reads and decrements balance without holding a per-user lock or enforcing a balance >= amount check inside an atomic critical section.",
+    "source_trace": [
+      {
+        "file": "server.js",
+        "line_start": 39,
+        "line_end": 47,
+        "symbol": "createVulnerableServer (/checkout check)",
+        "role": "entrypoint"
+      },
+      {
+        "file": "server.js",
+        "line_start": 49,
+        "line_end": 52,
+        "symbol": "createVulnerableServer (/checkout debit)",
+        "role": "propagation"
+      },
+      {
+        "file": "store.js",
+        "line_start": 42,
+        "line_end": 49,
+        "symbol": "FileCheckoutStore.setBalance",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "node --test examples/vulnerable-checkout/reproducers/double-spend.repro.test.cjs",
+      "test_file": "reproducers/double-spend.repro.test.cjs",
+      "runs_executed": 3,
+      "runs_failed": 3,
+      "observed_failure_output": "Both concurrent POST /checkout ($80 each against $100 wallet) returned HTTP 200 OK; orders.length=2; final balance=-60."
+    },
+    "disprover_notes": "Checked server.js and store.js for any mutex, queue, or optimistic version check; none exists around /checkout.",
+    "minimal_fix": "Wrap check-and-debit in a per-userId serialized mutex queue (see fixed-server.js:createKeyedMutex) or execute a single atomic conditional debit.",
+    "regression_test_strategy": "Keep reproducers/double-spend.repro.test.cjs in CI asserting 1x 200 OK, 1x 409 Conflict, and balance == 20."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-webhook-duplicate-002",
+    "fault_unit_ids": ["fu-webhook-payment-002"],
+    "title": "Non-idempotent POST /webhooks/payment double-credits user wallets on retries",
+    "failure_class": "non_idempotent_retry",
+    "severity": "high",
+    "blast_radius": "Every webhook retry or concurrent redelivery from the payment processor permanently inflates user wallet balances.",
+    "trigger_likelihood": "High: at-least-once delivery is standard across Stripe, PayPal, and queue brokers.",
+    "broken_invariant": "Duplicate delivery of the same payment eventId must credit the target wallet at most once.",
+    "root_cause": "POST /webhooks/payment never checks store.hasProcessedWebhook(eventId) or an in-flight deduplication set before awaiting and invoking store.recordWebhookCredit(eventId, userId, amount).",
+    "source_trace": [
+      {
+        "file": "server.js",
+        "line_start": 56,
+        "line_end": 65,
+        "symbol": "createVulnerableServer (/webhooks/payment)",
+        "role": "entrypoint"
+      },
+      {
+        "file": "store.js",
+        "line_start": 56,
+        "line_end": 60,
+        "symbol": "FileCheckoutStore.recordWebhookCredit",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "node --test examples/vulnerable-checkout/reproducers/webhook-duplicate.repro.test.cjs",
+      "test_file": "reproducers/webhook-duplicate.repro.test.cjs",
+      "runs_executed": 3,
+      "runs_failed": 3,
+      "observed_failure_output": "Two deliveries of eventId evt_stripe_991 (amount=50) both returned 200 OK and credited wallet from 0 to 100."
+    },
+    "disprover_notes": "Confirmed store.hasProcessedWebhook exists at store.js:62-64 but is never called by server.js.",
+    "minimal_fix": "Check both processed webhooks and an in-flight eventId Set synchronously before awaiting, and commit eventId alongside the balance credit atomically.",
+    "regression_test_strategy": "Keep reproducers/webhook-duplicate.repro.test.cjs in CI asserting wallet balance == 50 and webhooks.length == 1."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-recommendations-timeout-003",
+    "fault_unit_ids": ["fu-recommendations-outbound-003"],
+    "title": "Unbounded http.get in GET /recommendations hangs indefinitely when upstream stalls",
+    "failure_class": "missing_timeout",
+    "severity": "high",
+    "blast_radius": "Stalled upstream recommendation API leaks open sockets and holds handler promises forever, risking service-wide availability degradation.",
+    "trigger_likelihood": "Medium-High during upstream network partitions or slow downstream tail latency.",
+    "broken_invariant": "Outbound upstream HTTP calls must enforce an explicit timeout and return within bounded latency.",
+    "root_cause": "GET /recommendations awaits a raw new Promise wrapping http.get(upstreamRecommendationsUrl) with no socket timeout option, no req.destroy() timer, and no AbortSignal.",
+    "source_trace": [
+      {
+        "file": "server.js",
+        "line_start": 34,
+        "line_end": 36,
+        "symbol": "createVulnerableServer",
+        "role": "entrypoint"
+      },
+      {
+        "file": "server.js",
+        "line_start": 68,
+        "line_end": 79,
+        "symbol": "createVulnerableServer (/recommendations)",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "fault_injection",
+      "command": "node --test examples/vulnerable-checkout/reproducers/timeout-hang.repro.test.cjs",
+      "test_file": "reproducers/timeout-hang.repro.test.cjs",
+      "runs_executed": 3,
+      "runs_failed": 3,
+      "observed_failure_output": "Against a local blackhole upstream TCP listener, GET /recommendations failed to respond before the 300ms client watchdog aborted with TimeoutError."
+    },
+    "disprover_notes": "Verified Node's http.get has no default short request timeout in this code path and no AbortSignal is passed.",
+    "minimal_fix": "Use fetch(url, { signal: AbortSignal.timeout(upstreamTimeoutMs) }) and return a bounded 504 / empty fallback payload on timeout.",
+    "regression_test_strategy": "Keep reproducers/timeout-hang.repro.test.cjs in CI against a local blackhole TCP socket."
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "fp-store-nonatomic-crash-004",
+    "fault_unit_ids": ["fu-store-crash-004"],
+    "title": "Direct fs.writeFileSync in FileCheckoutStore.writeState risks JSON truncation on mid-write crash",
+    "failure_class": "non_atomic_file_write",
+    "severity": null,
+    "broken_invariant": "On-disk JSON state must remain valid and parseable if the process crashes mid-write.",
+    "root_cause": "FileCheckoutStore.writeState calls fs.writeFileSync(this.filePath, ...) directly in place rather than writing a sibling temp file, calling fsyncSync, and atomically renaming.",
+    "source_trace": [
+      {
+        "file": "store.js",
+        "line_start": 23,
+        "line_end": 25,
+        "symbol": "FileCheckoutStore.writeState",
+        "role": "sink"
+      }
+    ],
+    "unresolved_fact": "Whether OS page-cache/power-loss truncation reproduces cleanly inside a pure userland Node test without syscall or block-device fault injection.",
+    "why_blocked": "Standard Node process exit does not interrupt a synchronous kernel write(2) halfway through a small JSON buffer deterministically.",
+    "safe_verification_recipe": "Run an isolated scratch container with dm-flakey or strace fault injection mid-write(2) and verify JSON.parse fails on recovery; compare against writeStateAtomic() at store.js:30-40."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "fp-refund-duplicate-005",
+    "fault_unit_ids": ["fu-refund-guard-005"],
+    "title": "Candidate duplicate refund race under concurrent POST /refund",
+    "failure_class": "non_idempotent_retry",
+    "severity": null,
+    "disprover_evidence": "Synchronous check of store.inFlightRefunds.has(orderId) || store.hasRefund(orderId) and immediate store.inFlightRefunds.add(orderId) happen on the same event-loop turn before await delay(30), with finally cleanup. Verified live in double-spend.repro.test.cjs: concurrent requests returned [200, 409] and refunds.length === 1.",
+    "mitigating_guard_location": {
+      "file": "server.js",
+      "line_start": 88,
+      "line_end": 98,
+      "symbol": "createVulnerableServer (/refund)"
+    },
+    "rejection_reason": "Single-threaded JS event loop makes the synchronous Set guard + cleanup in finally mutual-exclusive across concurrent requests in a single-process deployment."
+  }
+]

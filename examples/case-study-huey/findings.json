@@ -1,0 +1,173 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-huey-peek-toctou-001",
+    "fault_unit_ids": ["fu-huey-peek-toctou-001"],
+    "title": "FileStorage.peek_data() violates stated exclusive-lock contract and crashes on concurrent pop_data()",
+    "failure_class": "toctou_race",
+    "severity": "high",
+    "blast_radius": "Any worker thread or status endpoint polling task results with peek_data() while another thread consumes results via pop_data() throws uncaught PermissionError/FileNotFoundError crashes.",
+    "trigger_likelihood": "High: reproduces in 100.0% of 50-trial multi-threaded runs with zero injected delays.",
+    "broken_invariant": "FileStorage.peek_data() must acquire self.lock to honor FileStorage's exclusive-lock guarantee and prevent TOCTOU open failures when pop_data() unlinks keys.",
+    "root_cause": "FileStorage documents that it uses exclusive locks around all filesystem operations (huey/storage.py:1384-1386), and pop_data() wraps unlink in with self.lock: (huey/storage.py:1590-1597), but peek_data() checks os.path.exists(filename) and opens filename without acquiring self.lock (huey/storage.py:1576-1585).",
+    "source_trace": [
+      {
+        "file": "huey/storage.py",
+        "line_start": 1380,
+        "line_end": 1411,
+        "symbol": "FileStorage (lock contract & __init__)",
+        "role": "entrypoint"
+      },
+      {
+        "file": "huey/storage.py",
+        "line_start": 1576,
+        "line_end": 1600,
+        "symbol": "FileStorage.peek_data / pop_data",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "python examples/case-study-huey/reproducers/huey_chaos_benchmark.py --huey-path <cloned-huey> --trials 50 --assert",
+      "test_file": "reproducers/huey_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 50,
+      "observed_failure_output": "50/50 trials crashed (100.0%): 444 uncaught exceptions (438x PermissionError, 6x FileNotFoundError) during concurrent peek_data() vs. put_data()/pop_data(). Wrapped LockedFileStorage scored 0/50 errors."
+    },
+    "disprover_notes": "Audited FileStorage.peek_data at huey/storage.py:1576-1585; neither self.lock nor try/except FileNotFoundError guards the os.path.exists -> open TOCTOU window.",
+    "minimal_fix": "Wrap FileStorage.peek_data() body in `with self.lock:` so reads serialize against pop_data() unlinks.",
+    "regression_test_strategy": "Retain 50-trial 4-thread barrier peek_data() vs. pop_data() test in huey_chaos_benchmark.py asserting 0 exceptions."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-huey-enqueued-toctou-002",
+    "fault_unit_ids": ["fu-huey-enqueued-toctou-002"],
+    "title": "FileStorage.enqueued_items() reads queue files without self.lock, crashing against dequeue()",
+    "failure_class": "toctou_race",
+    "severity": "high",
+    "blast_radius": "Inspecting pending queue items (e.g., admin dashboards or metrics collectors) while worker threads call dequeue() fails repeatedly with PermissionError/FileNotFoundError.",
+    "trigger_likelihood": "High: reproduces in 100.0% of 50-trial runs (1,468 uncaught exceptions across 50 trials).",
+    "broken_invariant": "FileStorage.enqueued_items() must acquire self.lock so queue inspection never tries to open task files simultaneously unlinked by dequeue().",
+    "root_cause": "FileStorage.dequeue() renames and unlinks queue_path files under with self.lock: (huey/storage.py:1447-1460), whereas enqueued_items() (lines 1465-1471) enumerates _get_sorted_filenames and opens each file without acquiring self.lock.",
+    "source_trace": [
+      {
+        "file": "huey/storage.py",
+        "line_start": 1447,
+        "line_end": 1460,
+        "symbol": "FileStorage.dequeue",
+        "role": "entrypoint"
+      },
+      {
+        "file": "huey/storage.py",
+        "line_start": 1465,
+        "line_end": 1471,
+        "symbol": "FileStorage.enqueued_items",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "python examples/case-study-huey/reproducers/huey_chaos_benchmark.py --huey-path <cloned-huey> --trials 50 --assert",
+      "test_file": "reproducers/huey_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 50,
+      "observed_failure_output": "50/50 trials crashed (100.0%): 1,468 uncaught exceptions (990x PermissionError, 478x FileNotFoundError) when enqueued_items() raced with dequeue(). Wrapped LockedFileStorage scored 0/50 errors."
+    },
+    "disprover_notes": "Audited FileStorage.enqueued_items and scheduled_items at huey/storage.py:1465-1524; neither acquires self.lock or handles vanished queue files.",
+    "minimal_fix": "Wrap FileStorage.enqueued_items() (and scheduled_items()) in `with self.lock:`.",
+    "regression_test_strategy": "Retain 50-trial 4-thread barrier enqueued_items() vs. dequeue() test in huey_chaos_benchmark.py asserting 0 exceptions."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "fp-huey-result-items-toctou-003",
+    "fault_unit_ids": ["fu-huey-result-items-toctou-003"],
+    "title": "FileStorage.result_items() walks and opens result files without self.lock, crashing against pop_data()",
+    "failure_class": "toctou_race",
+    "severity": "high",
+    "blast_radius": "Calling result_items() concurrently with pop_data()/put_data() throws uncaught FileNotFoundError/PermissionError and aborts the snapshot.",
+    "trigger_likelihood": "High: reproduces in 90.0% of 50-trial multi-threaded runs with zero injected delays.",
+    "broken_invariant": "FileStorage.result_items() must acquire self.lock when walking result_path and reading files to prevent PermissionError/FileNotFoundError races.",
+    "root_cause": "FileStorage.result_items() iterates os.walk(self.result_path) via _result_files() and opens each file without acquiring self.lock (huey/storage.py:1631-1647) while put_data()/pop_data() overwrite and unlink files inside with self.lock: (lines 1537-1600).",
+    "source_trace": [
+      {
+        "file": "huey/storage.py",
+        "line_start": 1587,
+        "line_end": 1600,
+        "symbol": "FileStorage.pop_data",
+        "role": "entrypoint"
+      },
+      {
+        "file": "huey/storage.py",
+        "line_start": 1631,
+        "line_end": 1647,
+        "symbol": "FileStorage._result_files / result_items",
+        "role": "sink"
+      }
+    ],
+    "reproducer": {
+      "kind": "concurrent_test",
+      "command": "python examples/case-study-huey/reproducers/huey_chaos_benchmark.py --huey-path <cloned-huey> --trials 50 --assert",
+      "test_file": "reproducers/huey_chaos_benchmark.py",
+      "runs_executed": 50,
+      "runs_failed": 45,
+      "observed_failure_output": "45/50 trials crashed (90.0%): 127 uncaught exceptions (86x PermissionError, 41x FileNotFoundError) when result_items() raced with put_data()/pop_data(). Wrapped LockedFileStorage scored 0/50 errors."
+    },
+    "disprover_notes": "Audited FileStorage.result_items at huey/storage.py:1640-1647; zero locking or missing-file tolerance exists.",
+    "minimal_fix": "Wrap FileStorage.result_items() in `with self.lock:`.",
+    "regression_test_strategy": "Retain 50-trial 4-thread barrier result_items() vs. put_data()/pop_data() test asserting 0 exceptions."
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "fp-huey-file-fsync-004",
+    "fault_unit_ids": ["fu-huey-file-fsync-004"],
+    "title": "FileStorage._put_data writes temp file and calls os.replace without os.fsync",
+    "failure_class": "missing_fsync_before_replace",
+    "severity": null,
+    "broken_invariant": "Newly written temp result files must have data blocks flushed via os.fsync before os.replace so a power loss never produces an empty replacement file.",
+    "root_cause": "FileStorage._put_data writes key length, key, and payload into tmp = filename + '.tmp' and exits the with block straight into os.replace(tmp, filename) (huey/storage.py:1552-1558) without fh.flush() or os.fsync(fh.fileno()).",
+    "source_trace": [
+      {
+        "file": "huey/storage.py",
+        "line_start": 1552,
+        "line_end": 1558,
+        "symbol": "FileStorage._put_data",
+        "role": "sink"
+      }
+    ],
+    "unresolved_fact": "Whether OS page-cache writeback reordering leaves zero-byte or stale data on target filesystems after an abrupt power cut.",
+    "why_blocked": "Deterministic power-loss reordering between close() and os.replace() requires VM/dm-flakey block-device fault injection.",
+    "safe_verification_recipe": "Run inside an isolated QEMU/dm-flakey Linux guest, issue put_data(), trigger abrupt power-off right after os.replace(), remount, and inspect file length."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "fp-huey-sqlite-dequeue-005",
+    "fault_unit_ids": ["fu-huey-sqlite-dequeue-005"],
+    "title": "Candidate concurrent duplicate delivery in SqliteStorage.dequeue()",
+    "failure_class": "concurrent_double_delivery",
+    "severity": null,
+    "disprover_evidence": "SqliteStorage.dequeue enters BaseSqlStorage.db(commit=True), which holds threading.Lock() across the connection and issues BEGIN EXCLUSIVE before SELECT id, data ... LIMIT 1 and DELETE FROM task WHERE id = ?. Executed 50x 4-thread drain trials (40 tasks each): 0 duplicate/lost trials and 0 runtime errors.",
+    "mitigating_guard_location": {
+      "file": "huey/storage.py",
+      "line_start": 821,
+      "line_end": 852,
+      "symbol": "BaseSqlStorage.db / SqliteStorage.begin_sql"
+    },
+    "rejection_reason": "Combination of self.lock mutex and SQLite BEGIN EXCLUSIVE serializes dequeue read-then-delete atomically across concurrent threads and processes."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "fp-huey-memory-iter-006",
+    "fault_unit_ids": ["fu-huey-memory-iter-006"],
+    "title": "Candidate RuntimeError in MemoryStorage.result_items() (unlocked dict copy vs. put_data/pop_data)",
+    "failure_class": "iterator_invalidation",
+    "severity": null,
+    "disprover_evidence": "MemoryStorage.result_items omits with self._lock: and returns dict(self._results), but CPython 3.13 executes PyDict_Copy atomically in C without releasing the GIL. Executed 50x 4-thread barrier stress trials against put_data/pop_data: 0/50 trials raised RuntimeError (note: free-threaded PEP 703 Python builds without GIL would still need self._lock).",
+    "mitigating_guard_location": {
+      "file": "huey/storage.py",
+      "line_start": 432,
+      "line_end": 433,
+      "symbol": "MemoryStorage.result_items"
+    },
+    "rejection_reason": "Hypothesis could not be reproduced on standard CPython 3.13 due to C-level PyDict_Copy atomicity under the GIL; rejected per evidence-gated rule requiring executed failing reproducer."
+  }
+]

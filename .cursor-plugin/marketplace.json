@@ -1,0 +1,17 @@
+{
+  "name": "Treamyracle",
+  "owner": {
+    "name": "Treamyracle",
+    "url": "https://github.com/Treamyracle"
+  },
+  "metadata": {
+    "description": "Chaos Audit: six-phase adversarial reliability and concurrency auditing plugin for Cursor"
+  },
+  "plugins": [
+    {
+      "name": "chaos-audit",
+      "source": "./",
+      "description": "Hunts race conditions, duplicate webhook retries, deadlocks, missing timeouts, and non-atomic state writes -- proven by executed deterministic reproducer tests."
+    }
+  ]
+}

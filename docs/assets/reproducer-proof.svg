@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 370" width="1200" height="370" role="img" aria-labelledby="repro-title">
+  <title id="repro-title">Deterministic Reproducer and Schema Validator Transcript</title>
+  <rect width="1200" height="370" rx="14" fill="#F6F4EF" stroke="#CFC8BA" stroke-width="1.5"/>
+
+  <!-- Solid carbon archival header strip (no macOS window dots) -->
+  <path d="M14,0 H1186 Q1200,0 1200,14 V46 H0 V14 Q0,0 14,0 Z" fill="#14161A"/>
+  <text x="28" y="28" fill="#F6F4EF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700">EXECUTION TRANSCRIPT  ·  examples/vulnerable-checkout</text>
+  <text x="1172" y="28" text-anchor="end" fill="#5EEAD4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">EXIT 0  ·  4/4 TESTS PASS</text>
+
+  <!-- Inner specimen sheet -->
+  <rect x="28" y="64" width="1144" height="282" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+
+  <text x="48" y="96" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">$ node --test examples/vulnerable-checkout/reproducers/*.repro.test.cjs</text>
+  <line x1="48" y1="112" x2="1152" y2="112" stroke="#D6D0C4" stroke-width="1"/>
+
+  <!-- Reproducer row 1 -->
+  <text x="48" y="138" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">[PASS]</text>
+  <text x="116" y="138" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">double-spend.repro.test.cjs</text>
+  <text x="1152" y="138" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5">Before: 2x 200 (bal -$60)  -&gt;  After: 200+409 ($20)</text>
+  <line x1="48" y1="154" x2="1152" y2="154" stroke="#ECE8DF" stroke-width="1"/>
+
+  <!-- Reproducer row 2 -->
+  <text x="48" y="180" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">[PASS]</text>
+  <text x="116" y="180" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">webhook-duplicate.repro.test.cjs</text>
+  <text x="1152" y="180" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5">Before: double-credit ($100)  -&gt;  After: deduped ($50)</text>
+  <line x1="48" y1="196" x2="1152" y2="196" stroke="#ECE8DF" stroke-width="1"/>
+
+  <!-- Reproducer row 3 -->
+  <text x="48" y="222" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">[PASS]</text>
+  <text x="116" y="222" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">timeout-hang.repro.test.cjs</text>
+  <text x="1152" y="222" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5">Before: 300ms TimeoutError  -&gt;  After: 504 fallback &lt;150ms</text>
+
+  <line x1="48" y1="244" x2="1152" y2="244" stroke="#D6D0C4" stroke-width="1.5"/>
+
+  <text x="48" y="274" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">$ node skills/chaos-audit/validate-findings.cjs --repo-root examples/vulnerable-checkout ...</text>
+  <text x="48" y="302" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">VALID fault-ledger: 5 unit(s), coverage=80% (covered=1, candidate=3, blocked=1, planned=0)</text>
+  <text x="48" y="328" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700">VALID findings: 5 record(s) (confirmed=3, needs_validation=1, rejected=1)</text>
+</svg>

@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" width="1200" height="660" role="img" aria-labelledby="bench-v2-title">
+  <title id="bench-v2-title">Three-Tier Real Before and After Proof: Blind A/B Eval, Concurrent MIT Case Study, and CI Benchmarks</title>
+
+  <rect width="1200" height="660" rx="14" fill="#F6F4EF" stroke="#CFC8BA" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="44" y="40" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing="2">THREE-TIER VERIFIED EVIDENCE</text>
+  <text x="44" y="70" fill="#14161A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, sans-serif" font-size="25" font-weight="800" letter-spacing="-0.6">Skill A/B Eval, Concurrent MIT Bug Fixes &amp; CI Fixture</text>
+  <text x="1156" y="68" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">ZERO FABRICATED NUMBERS</text>
+
+  <!-- Plate 01: Controlled Blind A/B Skill Eval -->
+  <rect x="44" y="90" width="1112" height="176" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <path d="M52,90 H1148 Q1156,90 1156,98 V124 H44 V98 Q44,90 52,90 Z" fill="#ECE8DF"/>
+  <line x1="44" y1="124" x2="1156" y2="124" stroke="#D6D0C4" stroke-width="1"/>
+  <text x="64" y="112" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">01 / BLIND A/B SKILL EVAL  (IDENTICAL MODEL)</text>
+  <text x="1136" y="112" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">examples/eval-suite/order-worker  (4 primary + 2 guarded decoys)</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#737C8C">
+    <text x="64" y="144">EVALUATION DIMENSION</text>
+    <text x="530" y="144" text-anchor="end">CONTROL (NO SKILL)</text>
+    <text x="830" y="144" text-anchor="end">WITH CHAOS-AUDIT</text>
+    <text x="1136" y="144" text-anchor="end">OBSERVED DELTA</text>
+  </g>
+  <line x1="64" y1="153" x2="1136" y2="153" stroke="#D6D0C4" stroke-width="1"/>
+
+  <text x="64" y="177" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">Confirmed real defects proven</text>
+  <text x="530" y="177" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">10  (0 node --test)</text>
+  <text x="830" y="177" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">17  (17x 3/3 repros)</text>
+  <text x="1136" y="177" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">+70% bugs (+7, 20 suites)</text>
+  <line x1="64" y1="192" x2="1136" y2="192" stroke="#ECE8DF" stroke-width="1"/>
+
+  <text x="64" y="214" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">Guarded paths &amp; sub-claims falsified</text>
+  <text x="530" y="214" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">0 formal rejected</text>
+  <text x="830" y="214" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">3 rejected + 3 disproved</text>
+  <text x="1136" y="214" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0/2 false positives</text>
+  <line x1="64" y1="229" x2="1136" y2="229" stroke="#ECE8DF" stroke-width="1"/>
+
+  <text x="64" y="250" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">Ledger coverage &amp; line-bound validator</text>
+  <text x="530" y="250" text-anchor="end" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">0% (no schema gate)</text>
+  <text x="830" y="250" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (16/16) · VALID</text>
+  <text x="1136" y="250" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">+100% mechanical check</text>
+
+  <!-- Plate 02: Concurrent-by-design MIT Case Study (coleifer/huey) -->
+  <rect x="44" y="280" width="1112" height="178" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <path d="M52,280 H1148 Q1156,280 1156,288 V314 H44 V288 Q44,280 52,280 Z" fill="#ECE8DF"/>
+  <line x1="44" y1="314" x2="1156" y2="314" stroke="#D6D0C4" stroke-width="1"/>
+  <text x="64" y="302" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">02 / CONCURRENT-BY-DESIGN MIT CASE STUDY</text>
+  <text x="1136" y="302" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">coleifer/huey v3.5.4 @ 7ea73730b9b6  (zero sleeps/mocks, N=50)</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#737C8C">
+    <text x="64" y="334">LOCK CONTRACT TEST</text>
+    <text x="410" y="334">BEFORE CRASH RATE</text>
+    <text x="845" y="334" text-anchor="middle">AFTER FIX</text>
+    <text x="1136" y="334" text-anchor="end">OBSERVED DELTA</text>
+  </g>
+  <line x1="64" y1="343" x2="1136" y2="343" stroke="#D6D0C4" stroke-width="1"/>
+
+  <text x="64" y="368" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">FileStorage.peek_data() vs pop</text>
+  <rect x="410" y="357" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="357" width="240" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="368" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (50/50)</text>
+  <rect x="790" y="352" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="368" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (0/50)</text>
+  <text x="1136" y="368" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">444 -&gt; 0 exceptions</text>
+  <line x1="64" y1="384" x2="1136" y2="384" stroke="#ECE8DF" stroke-width="1"/>
+
+  <text x="64" y="405" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">FileStorage.enqueued_items() vs deq</text>
+  <rect x="410" y="394" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="394" width="240" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="405" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (50/50)</text>
+  <rect x="790" y="389" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="405" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (0/50)</text>
+  <text x="1136" y="405" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">1,468 -&gt; 0 exceptions</text>
+  <line x1="64" y1="421" x2="1136" y2="421" stroke="#ECE8DF" stroke-width="1"/>
+
+  <!-- 90% width = 216px of 240px -->
+  <text x="64" y="442" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">FileStorage.result_items() vs pop</text>
+  <rect x="410" y="431" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="431" width="216" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="442" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">90%  (45/50)</text>
+  <rect x="790" y="426" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="442" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (0/50)</text>
+  <text x="1136" y="442" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">127 -&gt; 0 exceptions</text>
+
+  <!-- Plate 03: Synthetic CI Fixture & Single-Process Durability -->
+  <rect x="44" y="472" width="1112" height="154" rx="8" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5"/>
+  <path d="M52,472 H1148 Q1156,472 1156,480 V506 H44 V480 Q44,472 52,472 Z" fill="#ECE8DF"/>
+  <line x1="44" y1="506" x2="1156" y2="506" stroke="#D6D0C4" stroke-width="1"/>
+  <text x="64" y="494" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700">03 / CI REGRESSION FIXTURE &amp; DURABILITY</text>
+  <text x="1136" y="494" text-anchor="end" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">vulnerable-checkout (CI) + msiemens/tinydb v4.9.0 ENOSPC (N=50)</text>
+
+  <text x="64" y="534" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">checkout: double-spend &amp; dup retry</text>
+  <rect x="410" y="523" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="523" width="240" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="534" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (50/50)</text>
+  <rect x="790" y="518" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="534" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (0/50)</text>
+  <text x="1136" y="534" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">-$4,000 / +$2,500 -&gt; $0 drift</text>
+  <line x1="64" y1="549" x2="1136" y2="549" stroke="#ECE8DF" stroke-width="1"/>
+
+  <text x="64" y="570" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">checkout: upstream HTTP blackhole</text>
+  <rect x="410" y="559" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="559" width="240" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="570" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (50/50)</text>
+  <rect x="790" y="554" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="570" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (504)</text>
+  <text x="1136" y="570" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">50 -&gt; 0 leaked sockets</text>
+  <line x1="64" y1="585" x2="1136" y2="585" stroke="#ECE8DF" stroke-width="1"/>
+
+  <text x="64" y="606" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600">tinydb v4.9.0: mid-write ENOSPC</text>
+  <rect x="410" y="595" width="240" height="12" rx="2" fill="#ECE8DF"/>
+  <rect x="410" y="595" width="240" height="12" rx="2" fill="#C83E2B"/>
+  <text x="664" y="606" fill="#C83E2B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">100% (50/50)</text>
+  <rect x="790" y="590" width="110" height="22" rx="4" fill="#E2F2F0"/>
+  <text x="845" y="606" text-anchor="middle" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700">0.0% (0/50)</text>
+  <text x="1136" y="606" text-anchor="end" fill="#14161A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">0% -&gt; 100% data preserved</text>
+
+  <!-- Footer -->
+  <text x="44" y="646" fill="#525B69" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">CI gate: node examples/vulnerable-checkout/benchmark.cjs --trials 50 --assert</text>
+  <text x="1156" y="646" text-anchor="end" fill="#0F766E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">HUEY + TINYDB + EVAL VERIFIED</text>
+</svg>
